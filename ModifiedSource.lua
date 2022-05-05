@@ -1398,6 +1398,8 @@ wait(3)
     });
 end)
 
+wait(6)
+
 local LoopTable = {"N/A"}
 local onTeam5 = "N/A"
 
