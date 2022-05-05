@@ -1398,6 +1398,7 @@ wait(3)
     });
 end)
 
+--[[
 wait(6)
 
 local LoopTable = {"N/A"}
@@ -1508,3 +1509,4 @@ while true do
 		end
 	end
 end
+--]]
