@@ -1044,3 +1044,428 @@ end
 client:console("Ceri loaded in " .. tostring(tick() - start) .. "ms")
 
 library:selectTab(library.tabs[1])
+
+----- NOTIFICATION SYSTEM -----
+
+local Notification = loadstring(game:HttpGet("https://pastebin.com/raw/7WADWN9U"))()
+getgenv().IrisAd = true
+
+local CheckPlayers = game:GetService("Players")
+local CheckPlr = CheckPlayers.LocalPlayer
+ 
+local userId = CheckPlr.UserId
+local thumbType = Enum.ThumbnailType.HeadShot
+local thumbSize = Enum.ThumbnailSize.Size420x420
+local content, isReady = CheckPlayers:GetUserThumbnailAsync(userId, thumbType, thumbSize)
+
+local GetStats = CheckPlayers.LocalPlayer.PlayerGui.Leaderboard.Main.Phantoms.DataFrame.Data:GetChildren()
+local GetStats2 = CheckPlayers.LocalPlayer.PlayerGui.Leaderboard.Main.Ghosts.DataFrame.Data:GetChildren()
+local usernames = {}
+
+
+for i,v in pairs(GetStats) do
+    if tonumber(v.Kdr.Text) >= 3 then
+        table.insert(usernames, v.Name)
+    end
+end
+
+for i,v in pairs(GetStats2) do
+    if tonumber(v.Kdr.Text) >= 3 then
+        table.insert(usernames, v.Name)
+    end
+end
+
+Notification.Notify("Message", "Hello "..CheckPlayers.LocalPlayer.Name.."!, we're scanning how many pro players are playing right now, please wait. And thanks for using this modified hack!", content, {
+Duration = 5,
+
+    TitleSettings = {
+        TextColor3 = Color3.fromRGB(240, 240, 240),
+        TextScaled = true,
+        TextWrapped = true,
+        TextSize = 14,
+        Font = Enum.Font.Code,
+    },
+
+    DescriptionSettings = {
+        TextColor3 = Color3.fromRGB(240, 240, 240),
+        TextScaled = false,
+        TextWrapped = true,
+        TextSize = 15,
+        Font = Enum.Font.Code,
+    },
+
+    GradientSettings = {
+        GradientEnabled = false,
+        SolidColorEnabled = true,
+        SolidColor = Color3.fromRGB(233, 233, 235),
+        Retract = true,
+    },
+
+    Main = {
+        BorderColor3 = Color3.fromRGB(255, 232, 197),
+        BackgroundColor3 = Color3.fromRGB(112, 118, 130),
+        BackgroundTransparency = 0.05,
+        Rounding = true,
+        BorderSizePixel = 1
+    }
+});
+
+wait(6)
+
+Notification.Notify("Message", "Here is the list: "..table.concat(usernames, ', ').."\n\nTOTAL: "..table.getn(usernames), "rbxassetid://9072944922", {
+Duration = 5,
+
+    TitleSettings = {
+        TextColor3 = Color3.fromRGB(240, 240, 240),
+        TextScaled = true,
+        TextWrapped = true,
+        TextSize = 14,
+        Font = Enum.Font.Code,
+    },
+
+    DescriptionSettings = {
+        TextColor3 = Color3.fromRGB(240, 240, 240),
+        TextScaled = false,
+        TextWrapped = true,
+        TextSize = 15,
+        Font = Enum.Font.Code,
+    },
+
+    GradientSettings = {
+        GradientEnabled = false,
+        SolidColorEnabled = true,
+        SolidColor = Color3.fromRGB(233, 233, 235),
+        Retract = true,
+    },
+
+    Main = {
+        BorderColor3 = Color3.fromRGB(255, 232, 197),
+        BackgroundColor3 = Color3.fromRGB(112, 118, 130),
+        BackgroundTransparency = 0.05,
+        Rounding = true,
+        BorderSizePixel = 1
+    }
+});
+
+-- print(table.getn(usernames))
+-- print(table.concat(usernames, ', '))
+
+local GetNamePlr = "N/A" 
+local successA = "N/A" 
+local successB = "N/A" 
+local Rank1 = "N/A" -- GHSOT
+local Rank2 = "N/A" -- PHANTOM
+local CheckGui = CheckPlayers.LocalPlayer.PlayerGui
+
+function GetSuccess()
+	local success, returnValue = pcall(function()
+	    return CheckGui.Leaderboard.Main.Ghosts.DataFrame.Data[GetNamePlr]
+	end)
+
+    local success2, returnValue = pcall(function()
+	    return CheckGui.Leaderboard.Main.Phantoms.DataFrame.Data[GetNamePlr]
+    end)
+    
+    if success then
+        successA = "True"
+        successB = "False"
+    end
+    
+    if success2 then
+        successB = "True"
+        successA = "False"
+    end
+end
+
+function GetRanks()
+    
+	local success3, returnValue = pcall(function()
+	    return CheckGui.Leaderboard.Main.Ghosts.DataFrame.Data[GetNamePlr]
+	end)
+
+    local success4, returnValue = pcall(function()
+	    return CheckGui.Leaderboard.Main.Phantoms.DataFrame.Data[GetNamePlr]
+    end)
+    
+    if success3 then
+    Rank1 = CheckGui.Leaderboard.Main.Ghosts.DataFrame.Data[GetNamePlr].Rank.Text
+    end
+    
+    if success4 then
+    Rank2 = CheckGui.Leaderboard.Main.Phantoms.DataFrame.Data[GetNamePlr].Rank.Text
+    end
+end
+
+CheckPlayers.PlayerAdded:Connect(function(player)
+    
+    GetNamePlr = player.Name
+    
+    wait(3)
+    print(Rank1)
+    print(Rank2)
+    GetSuccess()
+    GetRanks()
+
+    local Notification = loadstring(game:HttpGet("https://pastebin.com/raw/7WADWN9U"))()
+
+    local CheckPlayers = game:GetService("Players")
+    local onTeam = "N/A"
+    local onGroup = "N/A"
+
+    local userId = player.UserId
+    local thumbType = Enum.ThumbnailType.HeadShot
+    local thumbSize = Enum.ThumbnailSize.Size420x420
+    local content, isReady = CheckPlayers:GetUserThumbnailAsync(userId, thumbType, thumbSize)
+
+    local Players = game:GetService("Players")
+
+	if player.Team == CheckPlayers.LocalPlayer.Team then
+        onTeam = "True"
+    else
+        onTeam = "False"
+	end
+
+   if player:IsInGroup(7) then                    
+        onGroup = "True"
+    else
+        onGroup = "False"
+   end
+   
+    if successA == "True" then
+        --print("Is on Ghosts!")
+        --print("PlayerName: "..GetNamePlr)
+        --print("SuccessA: "..successA)
+        --print("SuccessB: "..successB)
+        --print("GhostRank: "..Rank1)
+        --print("PhantomRank: "..Rank2)
+        Notification.Notify("Server", player.Name.." Has joined the server, here its the list of his/her stats:\n\nRank: "..Rank1.."\nOn team: "..onTeam.."\nOn group: "..onGroup, content, {
+        Duration = 5,
+         
+        TitleSettings = {
+            TextColor3 = Color3.fromRGB(240, 240, 240),
+            TextScaled = true,
+            TextWrapped = true,
+            TextSize = 14,
+            Font = Enum.Font.Code,
+        },
+         
+        DescriptionSettings = {
+            TextColor3 = Color3.fromRGB(240, 240, 240),
+            TextScaled = false,
+            TextWrapped = true,
+            TextSize = 15,
+            Font = Enum.Font.Code,
+        },
+         
+        GradientSettings = {
+            GradientEnabled = false,
+            SolidColorEnabled = true,
+            SolidColor = Color3.fromRGB(233, 233, 235),
+            Retract = true,
+        },
+         
+        Main = {
+            BorderColor3 = Color3.fromRGB(255, 232, 197),
+            BackgroundColor3 = Color3.fromRGB(112, 118, 130),
+            BackgroundTransparency = 0.05,
+            Rounding = true,
+            BorderSizePixel = 1
+        }
+        });
+    end
+
+    if successB == "True" then
+        --print("Is on Phantoms!")
+        --print("PlayerName: "..GetNamePlr)
+        --print("SuccessA: "..successA)
+        --print("SuccessB: "..successB)
+        --print("GhostRank: "..Rank1)
+        --print("PhantomRank: "..Rank2)
+        Notification.Notify("Server", player.Name.." Has joined the server, here its the list of his/her stats:\n\nRank: "..Rank2.."\nOn team: "..onTeam.."\nOn group: "..onGroup, "rbxthumb://type=AvatarHeadShot&id=2965877981&w=420&h=420", {
+        Duration = 5,
+         
+        TitleSettings = {
+            TextColor3 = Color3.fromRGB(240, 240, 240),
+            TextScaled = true,
+            TextWrapped = true,
+            TextSize = 14,
+            Font = Enum.Font.Code,
+        },
+         
+        DescriptionSettings = {
+            TextColor3 = Color3.fromRGB(240, 240, 240),
+            TextScaled = false,
+            TextWrapped = true,
+            TextSize = 15,
+            Font = Enum.Font.Code,
+        },
+         
+        GradientSettings = {
+            GradientEnabled = false,
+            SolidColorEnabled = true,
+            SolidColor = Color3.fromRGB(233, 233, 235),
+            Retract = true,
+        },
+         
+        Main = {
+            BorderColor3 = Color3.fromRGB(255, 232, 197),
+            BackgroundColor3 = Color3.fromRGB(112, 118, 130),
+            BackgroundTransparency = 0.05,
+            Rounding = true,
+            BorderSizePixel = 1
+        }
+        });
+    end
+end)
+
+CheckPlayers.PlayerRemoving:Connect(function(player)
+wait(3)
+    local userId = player.UserId
+    local thumbType = Enum.ThumbnailType.HeadShot
+    local thumbSize = Enum.ThumbnailSize.Size420x420
+    local content, isReady = CheckPlayers:GetUserThumbnailAsync(userId, thumbType, thumbSize)
+
+    Notification.Notify("Server", player.Name.." Has left the server.", content, {
+    Duration = 5,
+         
+    TitleSettings = {
+        TextColor3 = Color3.fromRGB(240, 240, 240),
+        TextScaled = true,
+        TextWrapped = true,
+        TextSize = 14,
+        Font = Enum.Font.Code,
+    },
+         
+    DescriptionSettings = {
+        TextColor3 = Color3.fromRGB(240, 240, 240),
+        TextScaled = false,
+        TextWrapped = true,
+        TextSize = 15,
+        Font = Enum.Font.Code,
+    },
+         
+    GradientSettings = {
+        GradientEnabled = false,
+        SolidColorEnabled = true,
+        SolidColor = Color3.fromRGB(233, 233, 235),
+        Retract = true,
+    },
+         
+    Main = {
+        BorderColor3 = Color3.fromRGB(255, 232, 197),
+        BackgroundColor3 = Color3.fromRGB(112, 118, 130),
+        BackgroundTransparency = 0.05,
+        Rounding = true,
+        BorderSizePixel = 1
+    }
+    });
+end)
+
+local LoopTable = {"N/A"}
+local onTeam5 = "N/A"
+
+while true do
+	wait(3)
+
+	for i,v in pairs(GetStats) do
+	    if tonumber(v.Kdr.Text) >= 3 then
+		    for a = 1, #LoopTable do
+                if not table.find(LoopTable, v.Name) then
+                    table.insert(LoopTable, v.Name)
+                 
+                    if CheckPlayers[v.Name].Team == CheckPlayers.LocalPlayer.Team then
+                        onTeam5 = "True"
+                    else
+                        onTeam5 = "False"
+                    end
+                    
+                    Notification.Notify("Warning", "We have dected a pro player: \n\nName: "..v.Name.."\nOn team: "..onTeam5.."\n\nWe suggest you to don't be sus", "rbxthumb://type=AvatarHeadShot&id="..CheckPlayers:GetUserIdFromNameAsync(v.Name).."&w=420&h=420", {
+                    Duration = 5,
+                     
+                        TitleSettings = {
+                            TextColor3 = Color3.fromRGB(240, 240, 240),
+                            TextScaled = true,
+                            TextWrapped = true,
+                            TextSize = 14,
+                            Font = Enum.Font.Code,
+                        },
+                 
+                        DescriptionSettings = {
+                            TextColor3 = Color3.fromRGB(240, 240, 240),
+                            TextScaled = false,
+                            TextWrapped = true,
+                            TextSize = 15,
+                            Font = Enum.Font.Code,
+                        },
+                     
+                        GradientSettings = {
+                            GradientEnabled = false,
+                            SolidColorEnabled = true,
+                            SolidColor = Color3.fromRGB(255, 232, 197),
+                            Retract = true,
+                        },
+                     
+                        Main = {
+                            BorderColor3 = Color3.fromRGB(255, 232, 197),
+                            BackgroundColor3 = Color3.fromRGB(234, 159, 53),
+                            BackgroundTransparency = 0.05,
+                            Rounding = true,
+                            BorderSizePixel = 1
+                       }
+                    });
+                end
+            end
+		end
+	end
+	
+	for i,v in pairs(GetStats2) do
+	    if tonumber(v.Kdr.Text) >= 3 then
+		    for a = 1, #LoopTable do
+                if not table.find(LoopTable, v.Name) then
+                    table.insert(LoopTable, v.Name)
+                 
+                    if CheckPlayers[v.Name].Team == CheckPlayers.LocalPlayer.Team then
+                        onTeam5 = "True"
+                    else
+                        onTeam5 = "False"
+                    end
+                    
+                    Notification.Notify("Warning", "We have dected a pro player: \n\nName: "..v.Name.."\nOn team: "..onTeam5.."\n\nWe suggest you to don't be sus", "rbxthumb://type=AvatarHeadShot&id="..CheckPlayers:GetUserIdFromNameAsync(v.Name).."&w=420&h=420", {
+                    Duration = 5,
+                     
+                        TitleSettings = {
+                            TextColor3 = Color3.fromRGB(240, 240, 240),
+                            TextScaled = true,
+                            TextWrapped = true,
+                            TextSize = 14,
+                            Font = Enum.Font.Code,
+                        },
+                 
+                        DescriptionSettings = {
+                            TextColor3 = Color3.fromRGB(240, 240, 240),
+                            TextScaled = false,
+                            TextWrapped = true,
+                            TextSize = 15,
+                            Font = Enum.Font.Code,
+                        },
+                     
+                        GradientSettings = {
+                            GradientEnabled = false,
+                            SolidColorEnabled = true,
+                            SolidColor = Color3.fromRGB(255, 232, 197),
+                            Retract = true,
+                        },
+                     
+                        Main = {
+                            BorderColor3 = Color3.fromRGB(255, 232, 197),
+                            BackgroundColor3 = Color3.fromRGB(234, 159, 53),
+                            BackgroundTransparency = 0.05,
+                            Rounding = true,
+                            BorderSizePixel = 1
+                       }
+                    });
+                end
+            end
+		end
+	end
+end
