@@ -776,12 +776,12 @@ function client:InitAimbot()
             local Distance = library.flags.FOV
             local Bodyparts
             local RealMouseLocation
-        --[[if library.flags.FOVFollowBarrel then
+            if library.flags.FOVFollowBarrel then
                 local Pos = Camera:WorldToViewportPoint(client.gamelogic.currentgun.barrel.CFrame * Vector3.new(0, 0, -10))
                 RealMouseLocation = Vector2.new(Pos.X, Pos.Y) --cba changing variable name + ratio
             else
                 RealMouseLocation = UserInputService:GetMouseLocation()
-            end]]--
+            end
             if RealMouseLocation ~= nil then
                 for i,v in pairs(Players:GetPlayers()) do
                     if (v ~= LocalPlayer) and (v.Team ~= LocalPlayer.Team) and client:IsAlive(v) then
@@ -880,6 +880,28 @@ function client:InitAimbot()
     end)
 end
 
+for i,v in pairs(animations) do
+   if v.player then 
+        local old_player = v.player
+        v.player = function(a, b)
+            print("Successfully overwritten function??")
+            if client.char.alive and client.gamelogic.currentgun and library.flags.NoAnim then
+                print("passed the first check?")
+                if client.gamelogic.currentgun.type ~= "KNIFE" then
+                    for i,v in pairs(client.gamelogic.currentgun.data.animations) do
+                        print("Looped through",v)
+                        if b == v then
+                            return function() end
+                        end
+                    end
+                end
+            end
+            return old_player(a,b)
+        end
+    end
+end
+
+
 function client:SolveVector3(Vector)
     if library.flags.NoRecoil == 0 then
         return Vector3.new()
@@ -893,6 +915,65 @@ function client:Weapons()
     local SolveVector3 = function(vector)return client:SolveVector3(vector) end
     local loadgun = debug.getupvalue(client.loadmodules, 6)
     local modifydata = debug.getupvalue(loadgun, 1)
+    debug.setupvalue(loadgun, 1, function(...)
+        retv = modifydata(...)
+        v1 = retv
+        if library.flags.CustomFirerate then
+            if type(retv.firerate) == 'number' then
+                retv.firerate = retv.firerate + library.flags.FirerateAdition
+            end
+        end
+
+        if library.flags.RecoilOn then
+            v1.rotkickmin = SolveVector3(v1.rotkickmin)
+            v1.rotkickmax = SolveVector3(v1.rotkickmax)
+            v1.transkickmin = SolveVector3(v1.transkickmin)
+            v1.transkickmax = SolveVector3(v1.transkickmax)
+            --v1.camkickmin = SolveVector3(v1.camkickmin)
+            --v1.camkickmax = SolveVector3(v1.camkickmax)
+            --v1.camkickspeed = 0;
+            v1.aimrotkickmin = SolveVector3(v1.aimrotkickmin)
+            v1.aimrotkickmax = SolveVector3(v1.aimrotkickmax)
+            v1.aimtranskickmin = SolveVector3(v1.aimtranskickmin)
+            v1.aimtranskickmax = SolveVector3(v1.aimtranskickmax)
+            v1.aimcamkickmin = SolveVector3(v1.aimcamkickmin)
+            v1.aimcamkickmax = SolveVector3(v1.aimcamkickmax)
+            --v1.aimcamkickspeed = 0;
+            --v1.modelkickspeed = 0;
+            --v1.modelrecoverspeed = 0;
+            --v1.modelkickdamper = 0.0;
+            --v1.aimkickmult = 0.0;
+        end
+        if library.flags.SpreadReduce then
+            v1.hipfirespread = v1.hipfirespread * library.flags.SpreadReduceValue;
+            v1.hipfirestability = v1.hipfirestability * library.flags.SpreadReduceValue;
+            v1.hipfirespreadrecover = v1.hipfirespreadrecover * library.flags.SpreadReduceValue;
+        end
+        if library.flags.CustomReloadSpeed then
+            local anim = v1.animations
+            if anim.tacticalreload then
+                v1.animations.tacticalreload.resettime = library.flags.ReloadSpeed
+                v1.animations.tacticalreload.stdtimescale = library.flags.ReloadSpeed
+                v1.animations.tacticalreload.timescale = library.flags.ReloadSpeed
+            elseif anim.reload then
+                v1.animations.reload.resettime = library.flags.ReloadSpeed 
+                v1.animations.reload.stdtimescale = library.flags.ReloadSpeed
+                v1.animations.reload.timescale = library.flags.ReloadSpeed 
+            elseif anim.pullbolt then
+                v1.animations.pullbolt.stdtimescale = library.flags.ReloadSpeed
+                v1.animations.pullbolt.timescale = library.flags.ReloadSpeed
+                v1.animations.pullbolt.resettime = library.flags.ReloadSpeed
+            end
+        end
+        return retv
+    end)
+    local gunbob = debug.getupvalue(loadgun, 58)
+    debug.setupvalue(loadgun, 58, function(...)
+        if library.flags.NoGunBob then 
+            return CFrame.new()
+        end
+        return gunbob(...)
+    end)
 end
 library.flags.GunColor = Color3.fromRGB(255,255,255)
 function client:MiscLoop()
@@ -910,6 +991,16 @@ function client:MiscLoop()
 
     GameGui.Killfeed.ChildAdded:Connect(function(c)
         repeat task.wait() until c.Text ~= "Shedletsky"
+        if library.flags.KillSay then
+            if c.Text == LocalPlayer.Name then
+                local Victim = c.Victim.Text
+                if Victim == LocalPlayer.Name then
+                    return
+                end
+                local Msg = library.flags.KillSayMsg..Victim or "You killed "..Victim
+                client.network:send("chatted", Msg)
+            end
+        end
     end)
     
     function closest()
@@ -943,11 +1034,29 @@ function client:MiscLoop()
     local oldsend = client.network.send
     equipped = 1
     client.network.send = function(self, name, ...)
+        if name == "falldamage" and library.flags.NoFallDamage then
+            return 
+        end
         
         if name == "equip" then 
             equipped = ...
         end
         
+        if name == "newgrenade" and library.flags.GrenadeTP then
+            local args = {...}
+            if args[2].blowuptime then args[2].blowuptime=library.flags.GrenadeBlowUpTime end
+            local ClosestPlayer = closest()
+            if not ClosestPlayer or not ClosestPlayer.Closest or not ClosestPlayer.Part then return old(self, data, ...) end
+            for i,v in pairs(args[2].frames) do
+                if v ~= args[2].frames[1] then
+                    if ClosestPlayer.OnScreen then
+                        if v.p0 then
+                            v.p0 = ClosestPlayer.Part.Position
+                        end
+                    end
+                end
+            end
+        end
         return oldsend(self, name, ...)
     end
     
@@ -967,7 +1076,25 @@ function client:MiscLoop()
 
 
     RunService:BindToRenderStep("Misc", 1, function()
-    --[[if not library.flags.Ambience and library.flags.FullBright then
+            if library.flags.HitboxExtender then
+            for i,v in pairs(Players:GetPlayers()) do
+                if client:IsAlive(v) and client.replication.bodyparts[v] and client.replication.bodyparts[v].head and client.char.alive then
+                    local bp = client.replication.bodyparts[v]
+                    local hbv = library.flags.HitboxExtenderValue
+                    bp.head.Size = Vector3.new(hbv,hbv,hbv)
+                    bp.torso.Size = Vector3.new(hbv,hbv,hbv)
+                    bp.lleg.Size = Vector3.new(hbv,hbv,hbv)
+                    bp.rleg.Size = Vector3.new(hbv,hbv,hbv)
+                    bp.larm.Size = Vector3.new(hbv,hbv,hbv)
+                    bp.rarm.Size = Vector3.new(hbv,hbv,hbv)
+                end
+            end
+        end 
+
+        if library.flags.WalkspeedOn then
+            client.char:setbasewalkspeed(library.flags.Walkspeed)
+        end
+        if not library.flags.Ambience and library.flags.FullBright then
             Lighting.Ambient = Color3.fromRGB(255,255,255)
             Lighting.Brightness = 1000
         end
@@ -979,11 +1106,39 @@ function client:MiscLoop()
             Lighting.Ambient = library.flags.AmbienceColor
         elseif not library.flags.FullBright and not library.flags.Ambience and not library.flags.RainbowAmbience then
             Lighting.Ambient = OldAmbience
-        end]]--
-    --[[if library.flags.Ambience then
+        end
+        if library.flags.Ambience then
             Lighting.Ambient = library.flags.AmbienceColor
-        end]]--
+        end
         
+        if library.flags.KnifeAura and client.char.alive then
+            if library.flags.KnifeAuraHeld then
+                if client.gamelogic.currentgun.type ~= "KNIFE" then
+                    return
+                end
+            end
+            for i,v in pairs(Players:GetPlayers()) do
+                if v ~= LocalPlayer and v.Team ~= LocalPlayer.Team then
+                    if client:IsAlive(v) and client.replication.bodyparts[v] then
+                        local Closest 
+                        local Distance = library.flags.KnifeAuraDistance
+                        local Dist = (client.replication.bodyparts[v].head.Position - LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
+                        if Dist < Distance then
+                            Dist = Distance
+                            oldsend(client.network, "equip", 3) -- thx iray for telling me this
+                            client.network:send("knifehit", client.replication.getplayerhit(client.replication.bodyparts[v].head), tick(), "Head")
+                            client.network:send("equip", equipped) 
+                        end
+                    end
+                end
+            end
+        end
+        if SpaceDown and client.char.alive and library.flags.BunnyHop then
+            client.char:setbasewalkspeed(library.flags.BunnyHopSpeed)
+            client.char:jump(4)
+        elseif not SpaceDown and client.char.alive and not library.flags.WalkspeedOn then
+            client.char:setbasewalkspeed(12)
+        end
     end)
     spawn(function()
         while wait() do
@@ -992,14 +1147,48 @@ function client:MiscLoop()
                 for i,v in pairs(gun:GetDescendants()) do
                     if not v.Name:find("TheBarrel") and not v.Name:find("IronGlow") and not v.Name:find("SightMark") and not v.Name:find("TheBarrel2") and v ~= client.gamelogic.currentgun.barrel then
                         if client:HasProperty(v, "Color") then
+                            if library.flags.GunColorOn and library.flags.RainbowGun then
+                                pcall(function()
+                                    if v.Material ~= Enum.Material.Glass then
+                                        v.Color = library.flags.GunColor
+                                    end
+                                end)
+                            elseif library.flags.GunColorOn and not library.flags.RainbowGun then
+                                pcall(function()
+                                    if v.Material ~= Enum.Material.Glass then
+                                        v.Color = library.flags.GunColor
+                                    end
+                                end)
+                            elseif not library.flags.GunColorOn and library.flags.RainbowGun then
+                                pcall(function()
+                                    if v.Material ~= Enum.Material.Glass then
+                                        local hue = tick() % 3/3
+                                        v.Color = Color3.fromHSV(hue,1,1)
+                                    end
+                                end)
+                            end
                         end 
+                        if client:HasProperty(v, "Material") and library.flags.WeaponMaterial then
+                            pcall(function()
+                                if v.Material ~= Enum.Material.Glass then
+                                    v.Material = Enum.Material[library.flags.WeaponMaterialValue]
+                                end    
+                            end)
+                        end
+                        if client:HasProperty(v, "Transparency") and library.flags.WeaponTransparency then
+                            pcall(function()
+                                if v.Material ~= Enum.Material.Glass then
+                                    v.Transparency = library.flags.WeaponTransparencyValue
+                                end
+                            end)
+                        end
                     end 
                 end
             end
         end
     end)
 
---[[spawn(function()
+    spawn(function()
         while wait() do
             if library.flags.RainbowAmbience and not library.flags.Ambience then
                 local hue = tick() % 2/2
@@ -1007,9 +1196,16 @@ function client:MiscLoop()
                 Lighting.Ambient = Color
             end
         end
-    end)--]]
+    end)
+
     
     local oldjump = client.char.jump
+    client.char.jump = function(tbl, jp)
+        if library.flags.JumpPowerOn then
+            return oldjump(tbl, library.flags.JumpPower)
+        end
+        return oldjump(tbl, jp)
+    end
 end
 
 function client:init()
