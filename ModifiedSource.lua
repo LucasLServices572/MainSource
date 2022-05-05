@@ -1075,6 +1075,43 @@ for i,v in pairs(GetStats2) do
     end
 end
 
+Notification.Notify("Warning", "You're using an secured account, so you can't use the complete hack.", "rbxassetid://9072448788", {
+Duration = 3,
+
+    TitleSettings = {
+        TextColor3 = Color3.fromRGB(240, 240, 240),
+        TextScaled = true,
+        TextWrapped = true,
+        TextSize = 14,
+        Font = Enum.Font.Code,
+    },
+
+    DescriptionSettings = {
+        TextColor3 = Color3.fromRGB(240, 240, 240),
+        TextScaled = false,
+        TextWrapped = true,
+        TextSize = 15,
+        Font = Enum.Font.Code,
+    },
+
+    GradientSettings = {
+        GradientEnabled = false,
+        SolidColorEnabled = true,
+        SolidColor = Color3.fromRGB(255, 232, 197),
+        Retract = true,
+    },
+
+    Main = {
+        BorderColor3 = Color3.fromRGB(255, 232, 197),
+        BackgroundColor3 = Color3.fromRGB(234, 159, 53),
+        BackgroundTransparency = 0.05,
+        Rounding = true,
+        BorderSizePixel = 1
+    }
+});
+
+wait(4)
+
 Notification.Notify("Message", "Hello "..CheckPlayers.LocalPlayer.Name.."!, we're scanning how many pro players are playing right now, please wait. And thanks for using this modified hack!", content, {
 Duration = 5,
 
