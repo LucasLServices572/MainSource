@@ -1623,6 +1623,8 @@ Duration = 5,
 -- print(table.getn(usernames))
 -- print(table.concat(usernames, ', '))
 
+--[[
+
 local GetNamePlr = "N/A" 
 local successA = "N/A" 
 local successB = "N/A" 
@@ -1834,7 +1836,6 @@ wait(3)
     });
 end)
 
---[[
 wait(6)
 
 local LoopTable = {"N/A"}
